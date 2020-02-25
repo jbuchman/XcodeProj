@@ -7,6 +7,10 @@ public final class PBXTargetDependency: PBXObject {
     /// Target name.
     public var name: String?
 
+    /// Platform filter attribute.
+    /// Introduced in: Xcode 11
+    public var platformFilter: String?
+    
     /// Target reference.
     var targetReference: PBXObjectReference?
 
@@ -72,6 +76,7 @@ public final class PBXTargetDependency: PBXObject {
         case target
         case targetProxy
         case productRef
+        case platformFilter
     }
 
     public required init(from decoder: Decoder) throws {
@@ -79,6 +84,7 @@ public final class PBXTargetDependency: PBXObject {
         let referenceRepository = decoder.context.objectReferenceRepository
         let objects = decoder.context.objects
         name = try container.decodeIfPresent(.name)
+        platformFilter = try container.decodeIfPresent(.platformFilter)
         if let targetReference: String = try container.decodeIfPresent(.target) {
             self.targetReference = referenceRepository.getOrCreate(reference: targetReference, objects: objects)
         }
@@ -101,6 +107,11 @@ extension PBXTargetDependency: PlistSerializable {
         if let name = name {
             dictionary["name"] = .string(CommentedString(name))
         }
+        
+        if let platformFilter = platformFilter {
+            dictionary["platformFilter"] = .string(.init(platformFilter))
+        }
+        
         if let targetReference = targetReference {
             let targetObject: PBXTarget? = targetReference.getObject()
             dictionary["target"] = .string(CommentedString(targetReference.value, comment: targetObject?.name))
